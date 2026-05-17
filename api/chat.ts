@@ -6,7 +6,7 @@
  * with conversation history persisted in Convex.
  */
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { mastra } from "../src/mastra/index.prod";
+import { mastra } from "../src/mastra/mastraProd";
 import type { WorkflowOutput, ConversationEntry } from "../src/mastra/workflows/schemas";
 
 const CONVEX_SITE_URL = process.env.CONVEX_SITE_URL || "http://127.0.0.1:3211";

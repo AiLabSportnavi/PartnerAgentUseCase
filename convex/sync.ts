@@ -134,12 +134,27 @@ function transformPartner(raw: any) {
   return partner;
 }
 
-// Internal query: get all existing external IDs
-export const getAllExternalIds = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    const partners = await ctx.db.query("partners").collect();
-    return new Map(partners.map((p) => [p.externalId, p._id]));
+// Internal query: get existing external IDs (paginated)
+export const getExternalIdsBatch = internalQuery({
+  args: {
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, { cursor }) => {
+    const PAGE_SIZE = 500;
+    const result = await ctx.db
+      .query("partners")
+      .paginate({ numItems: PAGE_SIZE, cursor: cursor ?? null });
+
+    const ids = result.page.map((p) => ({
+      externalId: p.externalId,
+      id: p._id,
+    }));
+
+    return {
+      ids,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   },
 });
 
@@ -196,24 +211,33 @@ export const upsertPartnerBatch = internalMutation({
   },
 });
 
-// Internal mutation: remove partners not in the current API response
-export const removeStalePartners = internalMutation({
+// Internal mutation: remove stale partners in paginated batches
+export const removeStalePartnersBatch = internalMutation({
   args: {
     activeExternalIds: v.array(v.number()),
+    cursor: v.optional(v.string()),
   },
-  handler: async (ctx, { activeExternalIds }) => {
+  handler: async (ctx, { activeExternalIds, cursor }) => {
     const activeSet = new Set(activeExternalIds);
-    const allPartners = await ctx.db.query("partners").collect();
-    let removed = 0;
+    const PAGE_SIZE = 500;
 
-    for (const partner of allPartners) {
+    const result = await ctx.db
+      .query("partners")
+      .paginate({ numItems: PAGE_SIZE, cursor: cursor ?? null });
+
+    let removed = 0;
+    for (const partner of result.page) {
       if (!activeSet.has(partner.externalId)) {
         await ctx.db.delete(partner._id);
         removed++;
       }
     }
 
-    return { removed };
+    return {
+      removed,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   },
 });
 
@@ -234,15 +258,26 @@ export const clearEmbeddingBatch = internalMutation({
   },
 });
 
-// Internal query: get partners that need embedding (new or content changed)
-export const getPartnersNeedingEmbedding = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    const partners = await ctx.db.query("partners").collect();
-    // Partners where embedding is missing (new or content changed)
-    return partners
+// Internal query: get partners that need embedding (paginated)
+export const getPartnersNeedingEmbeddingBatch = internalQuery({
+  args: {
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, { cursor }) => {
+    const PAGE_SIZE = 200;
+    const result = await ctx.db
+      .query("partners")
+      .paginate({ numItems: PAGE_SIZE, cursor: cursor ?? null });
+
+    const needsEmbedding = result.page
       .filter((p) => !p.embedding && p.searchText)
       .map((p) => ({ id: p._id, searchText: p.searchText! }));
+
+    return {
+      partners: needsEmbedding,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   },
 });
 
@@ -343,12 +378,22 @@ export const syncPartners = internalAction({
         totalUpdated += result.updated;
       }
 
-      // ── Phase 3: Remove stale partners ──
+      // ── Phase 3: Remove stale partners (paginated) ──
       const activeIds = rawPartners.map((p: any) => p.id);
-      const { removed } = await ctx.runMutation(
-        internal.sync.removeStalePartners,
-        { activeExternalIds: activeIds },
-      );
+      let removed = 0;
+      let cursor: string | undefined = undefined;
+      let isDone = false;
+
+      while (!isDone) {
+        const result: { removed: number; isDone: boolean; continueCursor: string } =
+          await ctx.runMutation(
+            internal.sync.removeStalePartnersBatch,
+            { activeExternalIds: activeIds, cursor },
+          );
+        removed += result.removed;
+        isDone = result.isDone;
+        cursor = result.continueCursor;
+      }
 
       // ── Phase 4: Rebuild metadata ──
       await rebuildMetadata(ctx, transformed);

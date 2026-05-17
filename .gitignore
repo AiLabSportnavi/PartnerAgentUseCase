@@ -11,3 +11,4 @@ mastra-observability.duckdb
 .gstack/
 
 .vercel
+.mastra/

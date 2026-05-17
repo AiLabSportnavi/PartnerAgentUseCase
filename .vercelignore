@@ -1,0 +1,15 @@
+node_modules/
+convex/_generated/
+.env
+.env.local
+mastra.db
+mastra.db-shm
+mastra.db-wal
+*.duckdb
+stitch_sport_navi_partner_chat/
+ARCHITECTURE.md
+WORKFLOW-DESCRIPTION.md
+WORKFLOW-GUIDE.md
+SYSTEM-DOCUMENTATION.md
+EXPERIMENT-REPORT.md
+mastra_workflow.md

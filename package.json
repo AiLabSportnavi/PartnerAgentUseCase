@@ -1,0 +1,59 @@
+{
+  "name": "partneragentusecase",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "convex:dev": "npx convex dev",
+    "convex:deploy": "npx convex deploy",
+    "seed": "tsx src/seed.ts",
+    "eval": "tsx src/evals/run-evals.ts",
+    "eval:city": "tsx src/evals/run-evals.ts city-resolution",
+    "eval:sport": "tsx src/evals/run-evals.ts sport-matching",
+    "eval:multilingual": "tsx src/evals/run-evals.ts multilingual",
+    "eval:safety": "tsx src/evals/run-evals.ts safety",
+    "eval:seed": "tsx src/evals/seed-and-run.ts --seed-only",
+    "eval:studio": "tsx src/evals/seed-and-run.ts",
+    "eval:run": "tsx src/evals/seed-and-run.ts --run-only",
+    "sync:vectors": "tsx src/mastra/rag/syncEmbeddings.ts",
+    "serve": "tsx src/server.ts",
+    "trace": "tsx src/trace.ts",
+    "build": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AiLabSportnavi/PartnerAgentUseCase.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AiLabSportnavi/PartnerAgentUseCase/issues"
+  },
+  "homepage": "https://github.com/AiLabSportnavi/PartnerAgentUseCase#readme",
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.75",
+    "@ai-sdk/openai": "^3.0.64",
+    "@mastra/core": "^1.35.0",
+    "@mastra/duckdb": "^1.3.2",
+    "@mastra/evals": "^1.2.2",
+    "@mastra/libsql": "^1.11.0",
+    "@mastra/loggers": "^1.1.1",
+    "@mastra/memory": "^1.18.2",
+    "@mastra/observability": "^1.12.0",
+    "@mastra/server": "^1.35.0",
+    "@openrouter/ai-sdk-provider": "^2.9.0",
+    "@types/node": "^25.8.0",
+    "convex": "^1.39.1",
+    "dotenv": "^17.4.2",
+    "mastra": "^1.9.3",
+    "tsx": "^4.22.0",
+    "typescript": "^6.0.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@vercel/node": "^5.8.2"
+  }
+}

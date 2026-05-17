@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.local
+mastra.db
+mastra-observability.duckdb
+*.duckdb
+.gstack/
+
+.vercel

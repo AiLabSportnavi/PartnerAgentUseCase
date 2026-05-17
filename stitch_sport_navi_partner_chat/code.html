@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="h-full" lang="de"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sport Navi Partner Assistant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "surface-container-highest": "#e1e3e4",
+                    "on-secondary-container": "#606364",
+                    "on-surface-variant": "#414754",
+                    "surface-tint": "#005bc0",
+                    "surface-container-lowest": "#ffffff",
+                    background: "#f8f9fa",
+                    primary: "#005bbf",
+                    secondary: "#5c5f60",
+                    "on-error": "#ffffff",
+                    "on-background": "#191c1d",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#191c1d",
+                    "surface-container-low": "#f3f4f5",
+                    outline: "#727785",
+                    "outline-variant": "#c1c6d6",
+                    "primary-container": "#1a73e8",
+                    "on-primary-container": "#ffffff",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-container": "#edeeef",
+                    surface: "#f8f9fa",
+                    "surface-bright": "#f8f9fa",
+                },
+                spacing: {
+                    md: "16px", sm: "8px", lg: "24px", xs: "4px", xl: "32px",
+                    "container-max-width": "800px",
+                    "bubble-padding-x": "16px", "bubble-padding-y": "10px"
+                },
+                fontFamily: { "body-md": ["Inter"], "headline-lg": ["Inter"], "body-sm": ["Inter"], "headline-md": ["Inter"], "label-md": ["Inter"], "label-sm": ["Inter"] },
+                fontSize: {
+                    "body-md": ["15px", { lineHeight: "22px", fontWeight: "400" }],
+                    "headline-lg": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                    "body-sm": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+                    "headline-md": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+                    "label-md": ["14px", { lineHeight: "20px", letterSpacing: "0.1px", fontWeight: "500" }],
+                    "label-sm": ["11px", { lineHeight: "16px", letterSpacing: "0.5px", fontWeight: "500" }]
+                }
+            },
+        },
+    }
+</script>
+<style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .chat-container { height: calc(100vh - 64px - 80px); }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes bounce-dot { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    .typing-dot:nth-child(1) { animation: bounce-dot 1.4s infinite 0s; }
+    .typing-dot:nth-child(2) { animation: bounce-dot 1.4s infinite 0.2s; }
+    .typing-dot:nth-child(3) { animation: bounce-dot 1.4s infinite 0.4s; }
+    /* Markdown styling inside assistant bubbles */
+    .assistant-md ul { list-style: disc; padding-left: 1.2em; margin: 4px 0; }
+    .assistant-md ol { list-style: decimal; padding-left: 1.2em; margin: 4px 0; }
+    .assistant-md li { margin: 2px 0; }
+    .assistant-md p { margin: 4px 0; }
+    .assistant-md strong { font-weight: 600; }
+    .assistant-md h2, .assistant-md h3 { font-weight: 600; margin-top: 8px; }
+</style>
+</head>
+<body class="bg-background font-body-md text-on-surface h-full flex flex-col items-center">
+
+<!-- TopAppBar -->
+<header class="bg-surface flex justify-between items-center w-full px-md h-16 max-w-container-max-width mx-auto sticky top-0 z-50">
+    <div class="flex items-center gap-sm">
+        <span class="material-symbols-outlined text-primary">sports_tennis</span>
+        <h1 class="font-headline-md text-headline-md font-semibold text-primary">Sport Navi</h1>
+    </div>
+    <div class="flex items-center gap-md">
+        <span class="hidden md:block font-label-md text-on-surface-variant">Partner Assistant</span>
+        <button class="hover:bg-surface-container-low transition-colors p-2 rounded-full">
+            <span class="material-symbols-outlined">account_circle</span>
+        </button>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="w-full max-w-container-max-width flex-grow flex flex-col bg-white shadow-sm overflow-hidden relative">
+    <!-- Chat Area -->
+    <div class="chat-container overflow-y-auto px-md py-lg scrollbar-hide flex flex-col gap-lg" id="chat-history">
+        <!-- Welcome State -->
+        <div class="flex flex-col items-center justify-center text-center py-xl px-md" id="welcome-state">
+            <div class="w-20 h-20 bg-primary-fixed flex items-center justify-center rounded-full mb-md">
+                <span class="material-symbols-outlined text-primary text-4xl">sports_tennis</span>
+            </div>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface mb-sm">Willkommen bei Sport Navi</h2>
+            <p class="font-body-md text-on-surface-variant max-w-md mb-lg">
+                Hey! Ich bin dein Sport Navi Assistent. Ich helfe dir, Fitness- und Sportpartner in ganz Deutschland zu finden.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-sm w-full max-w-lg" id="suggestion-chips">
+                <button onclick="sendSuggestion('Yoga in Dortmund')" class="chip-btn flex items-center justify-center border border-outline-variant rounded-full py-2 px-md font-label-md text-primary hover:bg-surface-container-low transition-colors">
+                    Yoga in Dortmund
+                </button>
+                <button onclick="sendSuggestion('Was gibt es in Köln?')" class="chip-btn flex items-center justify-center border border-outline-variant rounded-full py-2 px-md font-label-md text-primary hover:bg-surface-container-low transition-colors">
+                    Was gibt es in Köln?
+                </button>
+                <button onclick="sendSuggestion('Etwas gegen Rückenschmerzen')" class="chip-btn flex items-center justify-center border border-outline-variant rounded-full py-2 px-md font-label-md text-primary hover:bg-surface-container-low transition-colors">
+                    Etwas gegen Rückenschmerzen
+                </button>
+                <button onclick="sendSuggestion('Zeig mir alles')" class="chip-btn flex items-center justify-center border border-outline-variant rounded-full py-2 px-md font-label-md text-primary hover:bg-surface-container-low transition-colors">
+                    Zeig mir alles
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="absolute bottom-0 left-0 right-0 p-md bg-white">
+        <div class="flex items-center gap-sm bg-white border border-outline-variant rounded-xl px-md py-sm focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all duration-200">
+            <textarea id="message-input" autofocus
+                class="w-full bg-transparent border-none focus:ring-0 resize-none font-body-md text-on-surface placeholder:text-on-surface-variant overflow-hidden"
+                placeholder="Frag mich etwas über Sport Navi Partner..." rows="1"
+                onkeydown="handleKeyDown(event)"></textarea>
+            <button id="send-btn" onclick="sendMessage()"
+                class="flex-shrink-0 w-10 h-10 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center hover:opacity-90 transition-opacity active:scale-95">
+                <span class="material-symbols-outlined">send</span>
+            </button>
+        </div>
+    </div>
+</main>
+
+<script>
+// ── Configuration ──
+const API_URL = window.location.origin; // same server
+const threadId = 'thread-' + Date.now();
+
+// ── State ──
+let isLoading = false;
+
+// ── DOM refs ──
+const chatHistory = document.getElementById('chat-history');
+const welcomeState = document.getElementById('welcome-state');
+const messageInput = document.getElementById('message-input');
+const sendBtn = document.getElementById('send-btn');
+
+// ── Send message ──
+async function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text || isLoading) return;
+
+    // Hide welcome state on first message
+    if (welcomeState) welcomeState.style.display = 'none';
+
+    // Add user bubble
+    addMessage('user', text);
+    messageInput.value = '';
+    messageInput.style.height = 'auto';
+
+    // Show typing indicator
+    setLoading(true);
+
+    try {
+        const res = await fetch(API_URL + '/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text, threadId }),
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+            addMessage('assistant', 'Fehler: ' + data.error);
+        } else {
+            addMessage('assistant', data.text, data.intent);
+        }
+    } catch (err) {
+        addMessage('assistant', 'Verbindungsfehler. Ist der Server gestartet?');
+    }
+
+    setLoading(false);
+}
+
+// ── Suggestion chips ──
+function sendSuggestion(text) {
+    messageInput.value = text;
+    sendMessage();
+}
+
+// ── Add message bubble ──
+function addMessage(role, text, intent) {
+    const wrapper = document.createElement('div');
+    const time = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+    if (role === 'user') {
+        wrapper.className = 'flex flex-col items-end gap-xs max-w-[85%] self-end';
+        wrapper.innerHTML = `
+            <div class="bg-primary-container text-on-primary-container px-bubble-padding-x py-bubble-padding-y rounded-[18px] rounded-br-[4px]">
+                <p class="font-body-md">${escapeHtml(text)}</p>
+            </div>
+            <span class="font-label-sm text-on-secondary-container px-xs">${time}</span>
+        `;
+    } else {
+        const renderedMd = marked.parse(text);
+        wrapper.className = 'flex flex-col items-start gap-xs max-w-[85%]';
+        wrapper.innerHTML = `
+            <div class="bg-[#f1f3f4] text-[#202124] px-bubble-padding-x py-bubble-padding-y rounded-[18px] rounded-bl-[4px]">
+                <div class="font-body-md assistant-md">${renderedMd}</div>
+            </div>
+            <div class="flex items-center gap-sm px-xs">
+                <span class="font-label-sm text-on-secondary-container">${time}</span>
+                ${intent ? `<span class="font-label-sm text-primary bg-primary-fixed px-2 py-0.5 rounded-full">${intent}</span>` : ''}
+            </div>
+        `;
+    }
+
+    // Insert before typing indicator (if present)
+    const typingEl = document.getElementById('typing-indicator');
+    if (typingEl) {
+        chatHistory.insertBefore(wrapper, typingEl);
+    } else {
+        chatHistory.appendChild(wrapper);
+    }
+
+    scrollToBottom();
+}
+
+// ── Typing indicator ──
+function setLoading(loading) {
+    isLoading = loading;
+    sendBtn.disabled = loading;
+    sendBtn.style.opacity = loading ? '0.5' : '1';
+
+    let typingEl = document.getElementById('typing-indicator');
+
+    if (loading && !typingEl) {
+        typingEl = document.createElement('div');
+        typingEl.id = 'typing-indicator';
+        typingEl.className = 'flex flex-col items-start gap-xs';
+        typingEl.innerHTML = `
+            <div class="bg-[#f1f3f4] px-bubble-padding-x py-bubble-padding-y rounded-[18px] rounded-bl-[4px] flex gap-1.5 items-center h-10">
+                <div class="w-2 h-2 bg-secondary rounded-full typing-dot"></div>
+                <div class="w-2 h-2 bg-secondary rounded-full typing-dot"></div>
+                <div class="w-2 h-2 bg-secondary rounded-full typing-dot"></div>
+            </div>
+        `;
+        chatHistory.appendChild(typingEl);
+        scrollToBottom();
+    } else if (!loading && typingEl) {
+        typingEl.remove();
+    }
+}
+
+// ── Keyboard handling ──
+function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+}
+
+// ── Auto-resize textarea ──
+messageInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// ── Utilities ──
+function scrollToBottom() {
+    setTimeout(() => chatHistory.scrollTop = chatHistory.scrollHeight, 50);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+</body></html>

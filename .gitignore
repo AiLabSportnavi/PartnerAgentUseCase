@@ -3,8 +3,11 @@ dist/
 .env
 .env.local
 mastra.db
+mastra.db-shm
+mastra.db-wal
 mastra-observability.duckdb
 *.duckdb
+.mcp.json
 .gstack/
 
 .vercel

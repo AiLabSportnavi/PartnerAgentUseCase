@@ -9,7 +9,7 @@ dotenv.config();
 import { createServer } from "http";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { mastra } from "./mastra/index";
+import { mastra } from "./mastra/mastraDev";
 import type { WorkflowOutput, ConversationEntry } from "./mastra/workflows/schemas";
 
 const PORT = Number(process.env.PORT) || 3000;

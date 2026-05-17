@@ -17,7 +17,7 @@ import { buildEnhanceUserPrompt } from "./mastra/workflows/enhancePrompt";
 import { preProcess } from "./mastra/guardrails";
 import { postProcess } from "./mastra/guardrails";
 import { embedSingle } from "./mastra/rag/embedPartners";
-import { mastra } from "./mastra/index";
+import { mastra } from "./mastra/mastraDev";
 import type { ConversationEntry } from "./mastra/workflows/schemas";
 
 // ── Colors for terminal output ──

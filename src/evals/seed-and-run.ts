@@ -11,7 +11,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 dotenv.config();
 
-import { mastra } from "../mastra/index";
+import { mastra } from "../mastra/mastraDev";
 import { partnerAgentDataset } from "./dataset";
 // Scorer IDs must match the keys registered in mastra config
 

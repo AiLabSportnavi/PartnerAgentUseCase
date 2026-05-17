@@ -3,7 +3,7 @@ dotenv.config({ path: ".env.local" });
 dotenv.config();
 
 import { runEvals } from "@mastra/core/evals";
-import { mastra } from "../mastra/index";
+import { mastra } from "../mastra/mastraDev";
 const partnerAgent = mastra.getAgent("responseAgent"); // evals target the response agent
 import { partnerAgentDataset } from "./dataset";
 import { allScorers } from "./scorers";

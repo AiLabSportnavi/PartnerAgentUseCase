@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 dotenv.config();
-import { mastra } from "./mastra/index";
+import { mastra } from "./mastra/mastraDev";
 import { createInterface } from "readline";
 import type { WorkflowOutput, ConversationEntry } from "./mastra/workflows/schemas";
 
